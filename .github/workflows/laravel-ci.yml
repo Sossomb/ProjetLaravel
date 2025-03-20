@@ -1,0 +1,34 @@
+name: CI/CD Laravel ISI BURGER
+
+on:
+  push:
+    branches:
+      - mbaye_ndeyesophie_burger
+  pull_request:
+    branches:
+      - mbaye_ndeyesophie_burger
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name:  Cloner le dépôt
+        uses: actions/checkout@v4
+      
+      - name:  Installer PHP et Composer
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, pdo, bcmath
+          coverage: none
+      
+      - name:  Installer les dépendances Laravel
+        run: |
+          composer install --no-dev --prefer-dist
+          cp .env.example .env
+          php artisan key:generate
+
+      - name:  Construire et pousser l'image Docker
+        run: |
+          docker build -t sosso/isi-burger:latest .
