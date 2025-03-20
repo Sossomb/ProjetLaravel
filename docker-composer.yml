@@ -1,0 +1,49 @@
+ version: '3'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: sosso/isi-burger:latest
+    container_name: isi-burger-app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+    networks:
+      - isi-burger-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: isi-burger-nginx
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    volumes:
+      - ./:/var/www/html
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d
+    networks:
+      - isi-burger-network
+
+  db:
+    image: mysql:8.0
+    container_name: isi-burger-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_USER: ${DB_USERNAME}
+    volumes:
+      - isi-burger-dbdata:/var/lib/mysql
+    networks:
+      - isi-burger-network
+
+networks:
+  isi-burger-network:
+    driver: bridge
+
+volumes:
+  isi-burger-dbdata:
+    driver: local
